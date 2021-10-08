@@ -1,22 +1,21 @@
+const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const {
   AuthenticationError,
   ForbiddenError
 } = require('apollo-server-express');
-const mongoose = require('mongoose');
 require('dotenv').config();
-
 const gravatar = require('../util/gravatar');
 
 module.exports = {
-  newNote: async (parent, args, { models, user }) => {
+  newNote: async (parent, { content }, { models, user }) => {
+    // if not a user, throw an Authentication Error
     if (!user) {
       throw new AuthenticationError('You must be signed in to create a note');
     }
-
     return await models.Note.create({
-      content: args.content,
+      content: content,
       author: mongoose.Types.ObjectId(user.id),
       favoriteCount: 0
     });
@@ -24,9 +23,8 @@ module.exports = {
   deleteNote: async (parent, { id }, { models, user }) => {
     // if not a user, throw an Authentication Error
     if (!user) {
-      throw new AuthenticationError('You must be signed in to delete a note');
+      throw new AuthenticationError('You must be signed in to create a note');
     }
-
     // find the note
     const note = await models.Note.findById(id);
     // if the note owner and current user don't match, throw a forbidden error
@@ -43,12 +41,11 @@ module.exports = {
       return false;
     }
   },
-  updateNote: async (parent, { content, id }, { models, user }) => {
+  updateNote: async (parent, { id, content }, { models, user }) => {
     // if not a user, throw an Authentication Error
     if (!user) {
       throw new AuthenticationError('You must be signed in to update a note');
     }
-
     // find the note
     const note = await models.Note.findById(id);
     // if the note owner and current user don't match, throw a forbidden error
@@ -72,11 +69,10 @@ module.exports = {
     );
   },
   toggleFavorite: async (parent, { id }, { models, user }) => {
-    // if no user context is passed, throw auth error
+    // if not a user, throw an Authentication Error
     if (!user) {
       throw new AuthenticationError();
     }
-
     // check to see if the user has already favorited the note
     let noteCheck = await models.Note.findById(id);
     const hasUser = noteCheck.favoritedBy.indexOf(user.id);
@@ -119,7 +115,7 @@ module.exports = {
     }
   },
   signUp: async (parent, { username, email, password }, { models }) => {
-    // normalize email address
+    // normalize  email address
     email = email.trim().toLowerCase();
     // hash the password
     const hashed = await bcrypt.hash(password, 10);
@@ -140,7 +136,6 @@ module.exports = {
       throw new Error('Error creating account');
     }
   },
-
   signIn: async (parent, { username, email, password }, { models }) => {
     if (email) {
       // normalize email address

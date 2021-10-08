@@ -8,7 +8,6 @@ const noteSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    // reference the author's object ID
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

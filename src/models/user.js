@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const UserSchema = new mongoose.Schema(
   {
     username: {
@@ -25,6 +24,7 @@ const UserSchema = new mongoose.Schema(
     timestamps: true
   }
 );
-
+// Define the 'User' model with the schema
 const User = mongoose.model('User', UserSchema);
+// Export the module
 module.exports = User;
